@@ -68,7 +68,7 @@ ACTION_MESSAGES[LOVER] = ['Просыпается любовница', 'Блок
 ACTION_MESSAGES[ROGUE] = ['Просыпается жулик', 'На эту ночь становится копией выбранного игрока']
 ACTION_MESSAGES[BOSS] = ['Просыпается мафия', 'Ищет копа']
 ACTION_MESSAGES[MAFIA] = ['Просыпается мафия', 'Совершает убийство']
-ACTION_MESSAGES[KILLER] = ['Просыпается мафия', 'Совершает убийство']
+ACTION_MESSAGES[KILLER] = ['Просыпается киллер', 'Совершает убийство']
 ACTION_MESSAGES[MANIAC] = ['Просыпается маньяк', 'Совершает убийство']
 ACTION_MESSAGES[FROSTBITE] = ['Просыпается отморозок','Убивает любого игрока с активной ролью']
 ACTION_MESSAGES[DOCTOR] = ['Просыпается доктор', 'Лечит любого игрока']
@@ -104,6 +104,7 @@ PLAYER_IS_DEAD = 'Игрок убит.'
 KILLER_IS = 'Его убийца - игрок номер '
 ROLE_IS_STOLED = 'Украдена роль, до конца ночи жулик это '
 NOT_ACTIVE_ROLE = 'Роль не активна'
+STOLEN_BY_ROGUE = ' (играет жулик)'
 
 WINNERS_MESSAGE = {}
 

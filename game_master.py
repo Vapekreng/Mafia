@@ -1,68 +1,9 @@
 from bearlibterminal import terminal
 
-import config
+from config import *
 import select_role
 import set_players
 import target
-
-
-ROLE_PROPETIES = config.ROLE_PROPETIES
-ACTION_MESSAGES = config.ACTION_MESSAGES
-BGCOLOR_LIGHTED = config.BGCOLOR_LIGHTED
-BGCOLOR_NORMAL = config.BGCOLOR_NORMAL
-WINNERS_MESSAGE = config.WINNERS_MESSAGE
-FIRST_NIGHT_MESSAGE = config.FIRST_NIGHT_MESSAGE
-SCREEN_WIDTH = config.SCREEN_WIDTH
-QUEUE = config.QUEUE
-X0 = config.X_START_POSITION
-MAX_ROLE_NAME_LENGTH = config.MAX_ROLE_NAME_LENGTH
-
-VOTING = config.VOTING
-JUDGE = config.JUDGE
-DEAD = config.DEAD
-JUDGE_RESOLUTION = config.JUDGE_RESOLUTION
-JUDGEMENT_RESULT = config.JUDGEMENT_RESULT
-LOVER_HAS_NO_TARGET = config.LOVER_HAS_NO_TARGET
-PLAYER_IS_BLOCKED_OR_KILLED = config.PLAYER_IS_BLOCKED_OR_KILLED
-IT_IS_NOT_COP = config.IT_IS_NOT_COP
-IT_IS_COP = config.IT_IS_COP
-WEREWOLF_BECOMES_MAFIA = config.WEREWOLF_BECOMES_MAFIA
-GOOD_NIGHT = config.GOOD_NIGHT
-GOOD_MORNING = config.GOOD_MORNING
-GAME_OVER = config.GAME_OVER
-KILLED_LIST = config.KILLED_LIST
-NO_KILLS_TONIGHT = config.NO_KILLS_TONIGHT
-KILLED_INDEX = config.KILLED_INDEX
-SURVIVORS = config.SURVIVORS
-HEIR_BECOMES_BOSS = config.HEIR_BECOMES_BOSS
-IT_IS_MAFIA = config.IT_IS_MAFIA
-IT_IS_NOT_MAFIA = config.IT_IS_NOT_MAFIA
-SIMILAR_FRACTIONS = config.SIMILAR_FRACTIONS
-DIFFERENT_FRACTIONS = config.DIFFERENT_FRACTIONS
-PLAYER_IS_ALIVE = config.PLAYER_IS_ALIVE
-PLAYER_IS_DEAD = config.PLAYER_IS_DEAD
-KILLER_IS = config.KILLER_IS
-ROLE_IS_STOLED = config.ROLE_IS_STOLED
-NOT_ACTIVE_ROLE = config.NOT_ACTIVE_ROLE
-
-ROGUE = config.ROGUE
-LOVER = config.LOVER
-BOSS = config.BOSS
-HEIR = config.HEIR
-MAFIA = config.MAFIA
-KILLER = config.KILLER
-MANIAC = config.MANIAC
-FROSTBITE = config.FROSTBITE
-DOCTOR = config.DOCTOR
-COP = config.COP
-JOURNALIST = config.JOURNALIST
-PRIEST = config.PRIEST
-WITNESS = config.WITNESS
-PEACEFUL = config.PEACEFUL
-WEREWOLF = config.WEREWOLF
-IMMORTAL = config.IMMORTAL
-
-MAFIA_FRACTION = config.MAFIA_FRACTION
 
 
 class GameMaster:
@@ -92,8 +33,8 @@ class GameMaster:
 
     def set_players(self):
         terminal.clear()
-        terminal.printf(X0, 2, FIRST_NIGHT_MESSAGE[0])
-        terminal.printf(X0, 4, FIRST_NIGHT_MESSAGE[1])
+        terminal.printf(X_START_POSITION, 2, FIRST_NIGHT_MESSAGE[0])
+        terminal.printf(X_START_POSITION, 4, FIRST_NIGHT_MESSAGE[1])
         select_roles_screen = set_players.SetPlayers(self.roles)
         self.players = select_roles_screen.get_roles()
 
@@ -117,7 +58,7 @@ class GameMaster:
                 terminal.bkcolor(BGCOLOR_NORMAL)
                 if current_position % 2 == 0:
                     terminal.bkcolor(BGCOLOR_LIGHTED)
-                terminal.printf(X0, 6, text0)
+                terminal.printf(X_START_POSITION, 6, text0)
                 terminal.bkcolor(BGCOLOR_NORMAL)
                 if current_position % 2 == 1:
                     terminal.bkcolor(BGCOLOR_LIGHTED)
@@ -132,9 +73,9 @@ class GameMaster:
             terminal.clear()
             if current_position % 2 != 0:
                 self.players[players_index] = DEAD
-                terminal.printf(X0, 2, JUDGEMENT_RESULT[0].center(SCREEN_WIDTH))
+                terminal.printf(X_START_POSITION, 2, JUDGEMENT_RESULT[0].center(SCREEN_WIDTH))
             else:
-                terminal.printf(X0, 2, JUDGEMENT_RESULT[1].center(SCREEN_WIDTH))
+                terminal.printf(X_START_POSITION, 2, JUDGEMENT_RESULT[1].center(SCREEN_WIDTH))
             terminal.refresh()
             terminal.read()
 
@@ -163,20 +104,20 @@ class GameMaster:
     def _is_active(self, players_role):
         answer = True
         if players_role == MAFIA:
-            if not self._in_game(MAFIA):
+            if MAFIA not in self.players:
                 players_role = BOSS
         players_index = self.players.index(players_role)
-        if players_index  in ([self.blocked_by_steal, self.blocked_by_love] + self.killed_players):
+        if players_index in ([self.blocked_by_steal, self.blocked_by_love] + self.killed_players):
                     answer = False
         if players_role == MAFIA:
-            if self.blocked_by_love != None:
+            if self.blocked_by_love is not None:
                 if self.players[self.blocked_by_love] == MAFIA:
                     answer = False
-            if self.blocked_by_steal != None:
+            if self.blocked_by_steal is not None:
                 if self.players[self.blocked_by_steal] == MAFIA:
                     answer = False
             mafia_is_alive = False
-            if self.killed_players != []:
+            if self.killed_players:
                 for alive_index in self.players:
                     if self.players[alive_index] == MAFIA or self.players[alive_index] == BOSS:
                         if alive_index not in self.killed_players:
@@ -185,7 +126,7 @@ class GameMaster:
                     answer = False
         if not answer:
             text = PLAYER_IS_BLOCKED_OR_KILLED.center(SCREEN_WIDTH)
-            x = X0
+            x = X_START_POSITION
             y = 6
             terminal.color('red')
             terminal.printf(x, y, text)
@@ -197,7 +138,7 @@ class GameMaster:
     def _make_love(self, role=LOVER):
         if not self._there_are_any_lovers(role):
             text = LOVER_HAS_NO_TARGET.center(SCREEN_WIDTH)
-            x = X0
+            x = X_START_POSITION
             y = 8
             terminal.clear()
             terminal.printf(x, y, text)
@@ -234,7 +175,7 @@ class GameMaster:
         victim = victims.get_target()[0]
         victim_role = self.players[victim]
         active = ROLE_PROPETIES[victim_role]['is active']
-        x = X0
+        x = X_START_POSITION
         y = 8
         if active:
             text = ROLE_IS_STOLED + victim_role
@@ -242,7 +183,7 @@ class GameMaster:
             terminal.printf(x, y, text)
             terminal.refresh()
             terminal.read()
-            self._print_hint(victim_role)
+            self._print_hint(victim_role, True)
             self.make_night_action[victim_role](ROGUE)
             self.blocked_by_steal = victim
             self.last_stealed = victim
@@ -258,7 +199,7 @@ class GameMaster:
             checked = check.get_target()[0]
             player = self.players[checked]
             text = IT_IS_NOT_COP.center(SCREEN_WIDTH)
-            x = X0
+            x = X_START_POSITION
             y = 8
             if player == COP:
                 text = IT_IS_COP.center(SCREEN_WIDTH)
@@ -268,7 +209,7 @@ class GameMaster:
 
     def _mafia_kill(self, role=MAFIA):
         killer_index = self._get_role_index(role)
-        if killer_index == None:
+        if killer_index is None:
             killer_index = self._get_role_index(BOSS)
         self._try_to_kill(killer_index, role, MAFIA)
 
@@ -325,7 +266,7 @@ class GameMaster:
             checked = check.get_target()[0]
             player = self.players[checked]
             text = IT_IS_NOT_MAFIA.center(SCREEN_WIDTH)
-            x = X0
+            x = X_START_POSITION
             y = 8
             if ROLE_PROPETIES[player]['fraction'] == MAFIA_FRACTION:
                 text = IT_IS_MAFIA.center(SCREEN_WIDTH)
@@ -341,7 +282,7 @@ class GameMaster:
         second_checked = checked[1]
         second_role = self.players[second_checked]
         text = SIMILAR_FRACTIONS.center(SCREEN_WIDTH)
-        x = X0
+        x = X_START_POSITION
         y = 9
         if ROLE_PROPETIES[first_role]['fraction'] != ROLE_PROPETIES[second_role]['fraction']:
             text = DIFFERENT_FRACTIONS.center(SCREEN_WIDTH)
@@ -349,14 +290,14 @@ class GameMaster:
         terminal.refresh()
         terminal.read()
 
-    def _meet_up(self, role=PRIEST):
+    def _meet_up(role=PRIEST):
             terminal.refresh()
             terminal.read()
 
-    def _find_murder(self, role = WITNESS):
+    def _find_murder(self, role=WITNESS):
         check = target.TargetZone(role, self.players)
         checked = check.get_target()[0]
-        x = X0
+        x = X_START_POSITION
         y = 8
         print(checked)
         print(self.killed_players)
@@ -381,7 +322,7 @@ class GameMaster:
                         werewolf_index = self.players.index(WEREWOLF)
                         self.players[werewolf_index] = MAFIA
                         terminal.clear()
-                        terminal.printf(X0, 8, WEREWOLF_BECOMES_MAFIA.center(SCREEN_WIDTH))
+                        terminal.printf(X_START_POSITION, 8, WEREWOLF_BECOMES_MAFIA.center(SCREEN_WIDTH))
                         terminal.refresh()
                         terminal.read()
 
@@ -391,7 +332,7 @@ class GameMaster:
                 heir_index = self.players.index(HEIR)
                 self.players[heir_index] = BOSS
                 terminal.clear()
-                terminal.printf(X0, 8, HEIR_BECOMES_BOSS.center(SCREEN_WIDTH))
+                terminal.printf(X_START_POSITION, 8, HEIR_BECOMES_BOSS.center(SCREEN_WIDTH))
                 terminal.refresh()
                 terminal.read()
 
@@ -405,13 +346,13 @@ class GameMaster:
     def print_night_results(self):
         terminal.clear()
         text = KILLED_LIST.center(SCREEN_WIDTH)
-        x = X0
+        x = X_START_POSITION
         y = 2
         terminal.printf(x, y, text)
-        if self.killed_players == []:
+        if not self.killed_players:
             text = NO_KILLS_TONIGHT
             text = text.center(SCREEN_WIDTH)
-            x = X0
+            x = X_START_POSITION
             y = 4
             terminal.printf(x, y, text)
         else:
@@ -420,7 +361,7 @@ class GameMaster:
                 player_role = self.players[player_index]
                 text = KILLED_INDEX + str(player_index + 1) + ' ' + player_role
                 text = text.center(SCREEN_WIDTH)
-                x = X0
+                x = X_START_POSITION
                 y = 4 + current_index * 2
                 terminal.printf(x, y, text)
                 current_index += 1
@@ -433,27 +374,29 @@ class GameMaster:
         self.killed_players = []
         self.killers = {}
 
-    def _print_hint(self, player):
+    def _print_hint(self, player, rogue=False):
         terminal.clear()
         text = ACTION_MESSAGES[player][0]
+        if rogue:
+            text = text + STOLEN_BY_ROGUE
         text = text.center(SCREEN_WIDTH)
-        x, y = X0, 2
+        x, y = X_START_POSITION, 2
         terminal.printf(x, y, text)
         text = ACTION_MESSAGES[player][1]
         text = text.center(SCREEN_WIDTH)
-        x, y = X0, 3
+        x, y = X_START_POSITION, 3
         terminal.printf(x, y, text)
         terminal.refresh()
 
     def sleep(self):
         terminal.clear()
-        terminal.printf(X0, 2, GOOD_NIGHT.center(SCREEN_WIDTH))
+        terminal.printf(X_START_POSITION, 2, GOOD_NIGHT.center(SCREEN_WIDTH))
         terminal.refresh()
         terminal.read()
 
     def _wake_up(self):
         terminal.clear()
-        terminal.printf(X0, 2, GOOD_MORNING.center(SCREEN_WIDTH))
+        terminal.printf(X_START_POSITION, 2, GOOD_MORNING.center(SCREEN_WIDTH))
         terminal.refresh()
         terminal.read()
 
@@ -471,8 +414,8 @@ class GameMaster:
             self.end_of_game = True
             if n == 1:
                 terminal.clear()
-                terminal.printf(X0, 2, GAME_OVER.center(SCREEN_WIDTH))
-                terminal.printf(X0, 4, WINNERS_MESSAGE[fractions_in_game[0]])
+                terminal.printf(X_START_POSITION, 2, GAME_OVER.center(SCREEN_WIDTH))
+                terminal.printf(X_START_POSITION, 4, WINNERS_MESSAGE[fractions_in_game[0]])
                 terminal.refresh()
                 terminal.read()
 
@@ -493,14 +436,14 @@ class GameMaster:
     def print_survivors(self):
         terminal.clear()
         text = SURVIVORS.center(80)
-        x = X0
+        x = X_START_POSITION
         y = 2
         terminal.printf(x, y, text)
         dict_of_survivors = self._get_survivors()
         current_index = 0
         for role in dict_of_survivors.keys():
             text = role.center(MAX_ROLE_NAME_LENGTH) + ' - ' + str(dict_of_survivors[role]).center(4)
-            x = X0
+            x = X_START_POSITION
             y = 4 + current_index * 2
             terminal.printf(x, y, text)
             current_index += 1
