@@ -170,6 +170,7 @@ class GameMaster:
             answer = True
         return answer
 
+# TODO при краже мафии не совершает убийство
     def _steal_role(self):
         victims = target.TargetZone(ROGUE, self.players)
         victim = victims.get_target()[0]
