@@ -20,7 +20,7 @@ while not master.end_of_game:
         master.print_night_results()
         master.kill_players()
         master.check()
-        master.clean_statuses()
-        master.print_survivors()
-terminal.read()
+        if not master.end_of_game:
+            master.clean_statuses()
+            master.print_survivors()
 terminal.close()
