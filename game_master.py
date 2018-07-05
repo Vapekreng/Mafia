@@ -102,28 +102,10 @@ class GameMaster:
         return answer
 
     def _is_active(self, players_role):
-        answer = True
         if players_role == MAFIA:
-            if MAFIA not in self.players:
-                players_role = BOSS
-        players_index = self.players.index(players_role)
-        if players_index in ([self.blocked_by_steal, self.blocked_by_love] + self.killed_players):
-                    answer = False
-        if players_role == MAFIA:
-            if self.blocked_by_love is not None:
-                if self.players[self.blocked_by_love] == MAFIA:
-                    answer = False
-            if self.blocked_by_steal is not None:
-                if self.players[self.blocked_by_steal] == MAFIA:
-                    answer = False
-            mafia_is_alive = False
-            if self.killed_players:
-                for alive_index in self.players:
-                    if self.players[alive_index] == MAFIA or self.players[alive_index] == BOSS:
-                        if alive_index not in self.killed_players:
-                            mafia_is_alive = True
-                if not mafia_is_alive:
-                    answer = False
+            answer = self._mafia_is_active()
+        else:
+            answer = self._player_is_active(players_role)
         if not answer:
             text = PLAYER_IS_BLOCKED_OR_KILLED.center(SCREEN_WIDTH)
             x = X_START_POSITION
@@ -133,6 +115,41 @@ class GameMaster:
             terminal.refresh()
             terminal.color('white')
             terminal.read()
+        return answer
+
+    def _mafia_is_active(self):
+        mafia_role = MAFIA
+        if MAFIA not in self.players:
+            mafia_role = BOSS
+        answer = self._mafia_is_alive(mafia_role) and self._mafia_is_not_blocked(mafia_role)
+        return answer
+
+    def _mafia_is_alive(self, mafia_role):
+        answer = False
+        count_of_players = len(self.players)
+        for index_of_player in range(count_of_players):
+            player = self.players[index_of_player]
+            if player == mafia_role:
+                if index_of_player not in self.killed_players:
+                    answer = True
+                    break
+        return answer
+
+    def _mafia_is_not_blocked(self, mafia_role):
+        answer = True
+        if self.blocked_by_love != None:
+            if self.players[self.blocked_by_love] == mafia_role:
+                answer = False
+        if self.blocked_by_steal != None:
+            if self.players[self.blocked_by_steal] == mafia_role:
+                answer = False
+        return answer
+
+    def _player_is_active(self, players_role):
+        answer = True
+        players_index = self.players.index(players_role)
+        if players_index in ([self.blocked_by_steal, self.blocked_by_love] + self.killed_players):
+            answer = False
         return answer
 
     def _make_love(self, role=LOVER):
@@ -233,8 +250,9 @@ class GameMaster:
                         self.killed_players.append(lover_index)
                         self.killers[lover_index] = killer_index
                     if killed_role == LOVER:
-                        self.killed_players.append(self.blocked_by_love)
-                        self.killers[self.blocked_by_love] = killer_index
+                        if self.blocked_by_love is not None:
+                            self.killed_players.append(self.blocked_by_love)
+                            self.killers[self.blocked_by_love] = killer_index
 
     def _get_role_index(self, role):
         role_index = None
@@ -291,7 +309,7 @@ class GameMaster:
         terminal.refresh()
         terminal.read()
 
-    def _meet_up(role=PRIEST):
+    def _meet_up(self, role=PRIEST):
             terminal.refresh()
             terminal.read()
 
@@ -300,8 +318,6 @@ class GameMaster:
         checked = check.get_target()[0]
         x = X_START_POSITION
         y = 8
-        print(checked)
-        print(self.killed_players)
         if checked not in self.killed_players:
             text = PLAYER_IS_ALIVE.center(SCREEN_WIDTH)
             terminal.printf(x, y, text)
